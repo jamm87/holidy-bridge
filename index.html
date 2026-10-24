@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holiday Bridge · Vacaciones 2027</title>
+<meta name="description" content="Planifica tus vacaciones de 2027 en España: combina festivos y fines de semana para conseguir más días libres gastando menos.">
+<style>
+/* =====================================================================
+   1. VARIABLES DE DISEÑO
+   Cambia aquí colores, tipografía y espaciados sin tocar el resto.
+   ===================================================================== */
+:root {
+  /* Color de acento (único) */
+  --acento: #0f766e;
+  --acento-hover: #115e59;
+  --acento-suave: #ccfbf1;
+  --acento-texto: #ffffff;
+
+  /* Neutros */
+  --fondo: #f6f7f9;
+  --superficie: #ffffff;
+  --borde: #e3e6ea;
+  --borde-fuerte: #cdd2d8;
+  --texto: #1f2933;
+  --texto-suave: #5f6b7a;
+  --texto-tenue: #8a94a3;
+
+  /* Tipos de día en el calendario */
+  --dia-laborable: #ffffff;
+  --dia-finde: #eceff3;
+  --dia-finde-texto: #6b7684;
+  --dia-festivo: #fde8e4;
+  --dia-festivo-texto: #9a3412;
+  --dia-festivo-borde: #f4b9a8;
+  --dia-vacaciones: var(--acento);
+  --dia-vacaciones-texto: #ffffff;
+  --dia-periodo: #e6f6f3;          /* días libres que forman parte de un periodo tuyo */
+  --dia-preview: #fff4c2;          /* vista previa de una sugerencia */
+  --dia-preview-borde: #e0b400;
+
+  /* Estados */
+  --aviso: #b45309;
+  --aviso-fondo: #fff7e6;
+  --peligro: #b42318;
+  --ok: #15803d;
+
+  /* Tipografía del sistema */
+  --fuente: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --texto-xs: 0.72rem;
+  --texto-sm: 0.84rem;
+  --texto-md: 0.95rem;
+  --texto-lg: 1.15rem;
+  --texto-xl: 1.6rem;
+
+  /* Espaciados y formas */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --radio: 10px;
+  --radio-sm: 6px;
+  --sombra: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --ancho-lateral: 380px;
+}
+
+/* =====================================================================
+   2. ESTILOS BASE
+   ===================================================================== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--fuente);
+  font-size: var(--texto-md);
+  color: var(--texto);
+  background: var(--fondo);
+  line-height: 1.45;
+}
+h1, h2, h3 { margin: 0; line-height: 1.2; }
+h2 { font-size: var(--texto-lg); }
+h3 { font-size: var(--texto-md); }
+p { margin: 0 0 var(--esp-2); }
+button, input, select { font: inherit; color: inherit; }
+a { color: var(--acento); }
+
+/* Botones */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--esp-2);
+  padding: var(--esp-2) var(--esp-4);
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde-fuerte);
+  background: var(--superficie);
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: var(--fondo); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primario { background: var(--acento); border-color: var(--acento); color: var(--acento-texto); }
+.btn-primario:hover { background: var(--acento-hover); }
+.btn-peligro { color: var(--peligro); }
+.btn-mini { padding: 2px var(--esp-2); font-size: var(--texto-xs); font-weight: 600; }
+.btn-texto { border: none; background: none; padding: 0; color: var(--acento); cursor: pointer; font-size: var(--texto-sm); text-decoration: underline; }
+
+/* Campos */
+label { font-size: var(--texto-sm); color: var(--texto-suave); display: block; margin-bottom: var(--esp-1); }
+select, input[type="number"], input[type="date"], input[type="text"] {
+  width: 100%;
+  padding: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+}
+select:focus, input:focus, .btn:focus-visible, .dia:focus-visible {
+  outline: 2px solid var(--acento); outline-offset: 1px;
+}
+
+/* =====================================================================
+   3. ESTRUCTURA
+   ===================================================================== */
+.cabecera {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  padding: var(--esp-4) var(--esp-5);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--esp-4); flex-wrap: wrap;
+}
+.marca { display: flex; align-items: center; gap: var(--esp-3); }
+.logo {
+  width: 40px; height: 40px; border-radius: var(--radio);
+  background: var(--acento); color: var(--acento-texto);
+  display: grid; place-items: center; font-size: 22px;
+}
+.marca h1 { font-size: var(--texto-lg); }
+.marca p { margin: 0; color: var(--texto-suave); font-size: var(--texto-sm); }
+.acciones-cabecera { display: flex; gap: var(--esp-2); flex-wrap: wrap; }
+
+.contenedor {
+  display: grid;
+  grid-template-columns: var(--ancho-lateral) minmax(0, 1fr);
+  gap: var(--esp-5);
+  padding: var(--esp-5);
+  max-width: 1500px;
+  margin: 0 auto;
+}
+.lateral, .principal { display: flex; flex-direction: column; gap: var(--esp-4); min-width: 0; }
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: var(--esp-4);
+}
+.tarjeta > h2 { margin-bottom: var(--esp-3); display: flex; align-items: center; justify-content: space-between; gap: var(--esp-2); }
+.subtitulo { color: var(--texto-suave); font-size: var(--texto-sm); }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: var(--esp-3); }
+.campo { margin-bottom: var(--esp-3); }
+
+/* Aviso */
+.aviso {
+  background: var(--aviso-fondo); color: var(--aviso);
+  border: 1px solid #f5d9a8; border-radius: var(--radio-sm);
+  padding: var(--esp-2) var(--esp-3); font-size: var(--texto-sm);
+}
+.oculto { display: none !important; }
+
+/* =====================================================================
+   4. CONTADOR
+   ===================================================================== */
+.contador { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--esp-2); text-align: center; }
+.contador div { background: var(--fondo); border-radius: var(--radio-sm); padding: var(--esp-3) var(--esp-1); }
+.contador strong { display: block; font-size: var(--texto-xl); line-height: 1.1; }
+.contador span { font-size: var(--texto-xs); color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; }
+.contador .pendientes strong { color: var(--acento); }
+.contador .negativo strong { color: var(--peligro); }
+.barra { height: 6px; background: var(--fondo); border-radius: 99px; margin-top: var(--esp-3); overflow: hidden; }
+.barra > div { height: 100%; background: var(--acento); width: 0; transition: width .3s; }
+.resumen-libres { margin-top: var(--esp-2); font-size: var(--texto-sm); color: var(--texto-suave); text-align: center; }
+
+/* =====================================================================
+   5. SUGERENCIAS Y PERIODOS
+   ===================================================================== */
+.lista { display: flex; flex-direction: column; gap: var(--esp-2); }
+.sugerencia, .periodo {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  padding: var(--esp-3);
+  display: grid; grid-template-columns: 1fr auto; gap: var(--esp-2); align-items: center;
+}
+.sugerencia:hover { border-color: var(--dia-preview-borde); background: #fffdf3; }
+.sugerencia.destacada { border-color: var(--acento); background: #f3fbf9; }
+.sugerencia .fechas, .periodo .fechas { font-weight: 600; font-size: var(--texto-sm); }
+.sugerencia .detalle, .periodo .detalle { font-size: var(--texto-xs); color: var(--texto-suave); }
+.cifras { display: flex; gap: var(--esp-2); flex-wrap: wrap; margin-top: var(--esp-1); }
+.chip {
+  display: inline-block; font-size: var(--texto-xs); padding: 1px var(--esp-2);
+  border-radius: 99px; background: var(--fondo); color: var(--texto-suave); white-space: nowrap;
+}
+.chip.acento { background: var(--acento-suave); color: var(--acento-hover); font-weight: 600; }
+.chip.etiqueta { background: var(--acento); color: var(--acento-texto); font-weight: 600; }
+.vacio { color: var(--texto-tenue); font-size: var(--texto-sm); text-align: center; padding: var(--esp-3); }
+
+/* =====================================================================
+   6. CALENDARIO
+   ===================================================================== */
+.leyenda { display: flex; flex-wrap: wrap; gap: var(--esp-3); font-size: var(--texto-xs); color: var(--texto-suave); }
+.leyenda span { display: inline-flex; align-items: center; gap: var(--esp-1); }
+.muestra { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--borde-fuerte); display: inline-block; }
+.muestra.laborable { background: var(--dia-laborable); }
+.muestra.finde { background: var(--dia-finde); }
+.muestra.festivo { background: var(--dia-festivo); border-color: var(--dia-festivo-borde); }
+.muestra.provisional { background: var(--dia-festivo); border: 1px dashed var(--dia-festivo-texto); }
+.muestra.vacaciones { background: var(--dia-vacaciones); border-color: var(--dia-vacaciones); }
+.muestra.periodo { background: var(--dia-periodo); }
+.muestra.preview { background: var(--dia-preview); border-color: var(--dia-preview-borde); }
+
+.calendario {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--esp-4);
+  margin-top: var(--esp-4);
+}
+.mes h3 { text-transform: capitalize; margin-bottom: var(--esp-2); font-size: var(--texto-sm); }
+.mes .resumen-mes { float: right; font-weight: 400; color: var(--texto-tenue); font-size: var(--texto-xs); text-transform: none; }
+.rejilla { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.cab-dia { font-size: var(--texto-xs); color: var(--texto-tenue); text-align: center; padding-bottom: 2px; }
+.dia {
+  aspect-ratio: 1 / 1;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: var(--dia-laborable);
+  font-size: var(--texto-xs);
+  display: grid; place-items: center;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  min-width: 0;
+}
+.dia.laborable { border-color: var(--borde); }
+.dia.laborable:hover { border-color: var(--acento); }
+.dia.finde { background: var(--dia-finde); color: var(--dia-finde-texto); cursor: default; }
+.dia.festivo { background: var(--dia-festivo); color: var(--dia-festivo-texto); border-color: var(--dia-festivo-borde); font-weight: 700; cursor: default; }
+.dia.festivo.provisional { border-style: dashed; border-color: var(--dia-festivo-texto); }
+.dia.en-periodo { box-shadow: inset 0 -3px 0 var(--acento); }
+.dia.finde.en-periodo { background: var(--dia-periodo); }
+.dia.vacaciones { background: var(--dia-vacaciones); color: var(--dia-vacaciones-texto); border-color: var(--dia-vacaciones); font-weight: 700; box-shadow: none; }
+.dia.preview { background: var(--dia-preview) !important; border-color: var(--dia-preview-borde) !important; color: var(--texto) !important; }
+.dia.vacio { visibility: hidden; cursor: default; }
+
+/* =====================================================================
+   7. FESTIVOS
+   ===================================================================== */
+.tabla-festivos { width: 100%; border-collapse: collapse; font-size: var(--texto-sm); }
+.tabla-festivos th, .tabla-festivos td { text-align: left; padding: var(--esp-2); border-bottom: 1px solid var(--borde); vertical-align: middle; }
+.tabla-festivos th { font-size: var(--texto-xs); color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.tabla-festivos tr.quitado td { color: var(--texto-tenue); text-decoration: line-through; }
+.tabla-festivos tr.quitado td:last-child { text-decoration: none; }
+.tabla-festivos td:last-child { text-align: right; white-space: nowrap; }
+.estado { font-size: var(--texto-xs); padding: 1px var(--esp-2); border-radius: 99px; white-space: nowrap; }
+.estado.oficial { background: #e7f6ec; color: var(--ok); }
+.estado.provisional { background: var(--aviso-fondo); color: var(--aviso); }
+.estado.personal { background: var(--acento-suave); color: var(--acento-hover); }
+.form-festivo { display: grid; grid-template-columns: 160px 1fr auto; gap: var(--esp-2); margin-top: var(--esp-3); align-items: end; }
+.fuentes { font-size: var(--texto-xs); color: var(--texto-suave); margin-top: var(--esp-3); }
+.fuentes li { margin-bottom: 2px; }
+.tabla-scroll { max-height: 420px; overflow: auto; }
+
+/* =====================================================================
+   8. AVISOS FLOTANTES Y PIE
+   ===================================================================== */
+.toast {
+  position: fixed; left: 50%; bottom: var(--esp-5); transform: translateX(-50%) translateY(20px);
+  background: var(--texto); color: #fff; padding: var(--esp-3) var(--esp-4);
+  border-radius: var(--radio); font-size: var(--texto-sm); box-shadow: var(--sombra);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: 90vw; z-index: 10;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.pie { text-align: center; color: var(--texto-tenue); font-size: var(--texto-xs); padding: 0 var(--esp-5) var(--esp-5); }
+
+/* =====================================================================
+   9. ADAPTACIÓN A PANTALLAS PEQUEÑAS
+   ===================================================================== */
+@media (max-width: 1250px) {
+  .calendario { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1000px) {
+  .contenedor { grid-template-columns: 1fr; padding: var(--esp-4); }
+  .calendario { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .cabecera { padding: var(--esp-3) var(--esp-4); }
+  .contenedor { padding: var(--esp-3); gap: var(--esp-3); }
+  .calendario { grid-template-columns: 1fr; }
+  .dia { font-size: var(--texto-sm); }
+  .form-festivo { grid-template-columns: 1fr; }
+  .fila { grid-template-columns: 1fr; }
+}
+@media print {
+  .lateral, .acciones-cabecera, .form-festivo { display: none; }
+  .contenedor { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="marca">
+    <div class="logo" aria-hidden="true">🌉</div>
+    <div>
+      <h1>Holiday Bridge</h1>
+      <p>Más días libres, menos días gastados · Vacaciones <span id="anio-titulo">2027</span></p>
+    </div>
+  </div>
+  <div class="acciones-cabecera">
+    <button class="btn btn-primario" id="btn-exportar" type="button">📅 Descargar .ics</button>
+    <button class="btn btn-peligro" id="btn-reset" type="button">Restablecer planificación</button>
+  </div>
+</header>
+
+<main class="contenedor">
+  <!-- ============ COLUMNA LATERAL ============ -->
+  <aside class="lateral">
+
+    <section class="tarjeta" aria-labelledby="t-config">
+      <h2 id="t-config">Tu configuración</h2>
+      <div class="campo">
+        <label for="sel-comunidad">Comunidad autónoma</label>
+        <select id="sel-comunidad"></select>
+      </div>
+      <div class="campo">
+        <label for="sel-municipio">Municipio</label>
+        <select id="sel-municipio"></select>
+      </div>
+      <div class="campo">
+        <label for="inp-dias">Días de vacaciones (laborables)</label>
+        <input type="number" id="inp-dias" min="0" max="99" step="1">
+      </div>
+      <p class="subtitulo">¿Te sobran días del año pasado? Súmalos aquí, que nadie te los va a reclamar.</p>
+      <div id="aviso-ubicacion" class="aviso oculto"></div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-contador">
+      <h2 id="t-contador">Tus días</h2>
+      <div class="contador">
+        <div><strong id="c-disponibles">0</strong><span>Disponibles</span></div>
+        <div><strong id="c-asignados">0</strong><span>Asignados</span></div>
+        <div class="pendientes" id="caja-pendientes"><strong id="c-pendientes">0</strong><span>Pendientes</span></div>
+      </div>
+      <div class="barra" aria-hidden="true"><div id="barra-uso"></div></div>
+      <p class="resumen-libres" id="resumen-libres"></p>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-sugerencias">
+      <h2 id="t-sugerencias">Sugerencias <span class="chip" id="chip-sugerencias"></span></h2>
+      <p class="subtitulo">Pasa el ratón por encima para verla en el calendario y acéptala con un clic.</p>
+      <div class="lista" id="lista-sugerencias"></div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-periodos">
+      <h2 id="t-periodos">Tus periodos</h2>
+      <div class="lista" id="lista-periodos"></div>
+    </section>
+  </aside>
+
+  <!-- ============ COLUMNA PRINCIPAL ============ -->
+  <div class="principal">
+    <section class="tarjeta" aria-labelledby="t-calendario">
+      <h2 id="t-calendario">Calendario <span id="anio-calendario">2027</span></h2>
+      <div class="leyenda" aria-label="Leyenda">
+        <span><i class="muestra laborable"></i>Laborable (clic para marcar)</span>
+        <span><i class="muestra finde"></i>Fin de semana</span>
+        <span><i class="muestra festivo"></i>Festivo</span>
+        <span><i class="muestra provisional"></i>Festivo provisional</span>
+        <span><i class="muestra vacaciones"></i>Vacaciones</span>
+        <span><i class="muestra periodo"></i>Libre dentro de tu periodo</span>
+        <span><i class="muestra preview"></i>Vista previa</span>
+      </div>
+      <div class="calendario" id="calendario"></div>
+    </section>
+
+    <section class="tarjeta" aria-labelledby="t-festivos">
+      <h2 id="t-festivos">Festivos de tu ubicación <button class="btn-texto" id="btn-restaurar-festivos" type="button">Deshacer mis cambios en festivos</button></h2>
+      <p class="subtitulo">¿Falta tu municipio o hay algún error? Añade, quita o corrige festivos: los cambios solo afectan a tu ubicación actual.</p>
+      <div class="tabla-scroll">
+        <table class="tabla-festivos">
+          <thead><tr><th>Fecha</th><th>Festivo</th><th>Ámbito</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="tabla-festivos"></tbody>
+        </table>
+      </div>
+      <form class="form-festivo" id="form-festivo">
+        <div>
+          <label for="inp-fecha-festivo">Fecha</label>
+          <input type="date" id="inp-fecha-festivo" required>
+        </div>
+        <div>
+          <label for="inp-nombre-festivo">Nombre</label>
+          <input type="text" id="inp-nombre-festivo" maxlength="80" placeholder="Ej.: Fiesta patronal" required>
+        </div>
+        <button class="btn btn-primario" type="submit">Añadir festivo</button>
+      </form>
+      <ul class="fuentes" id="lista-fuentes"></ul>
+    </section>
+  </div>
+</main>
+
+<p class="pie">Holiday Bridge guarda todo en tu navegador (localStorage): sin cuentas, sin registros y sin que tu jefe se entere. Revisa siempre los festivos marcados como provisionales.</p>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   1. DATOS DE FESTIVOS
+   ---------------------------------------------------------------------
+   Estructura organizada por año. Para añadir otro año basta con crear
+   una nueva clave (por ejemplo 2028) con la misma forma y cambiar
+   ANIO_ACTIVO más abajo.
+
+   Cada festivo es una lista: [fecha 'AAAA-MM-DD', nombre, estado?, ámbito?]
+     - estado (opcional): 'oficial' o 'provisional'. Si se omite, se usa
+       el estado del grupo (nacional, comunidad o municipio).
+     - ámbito (opcional): sustituye al ámbito por defecto (p. ej. 'Insular').
+
+   ESTADOS:
+     'oficial'     → fecha recogida en una norma o acuerdo oficial publicado
+                     (BOE, boletín autonómico o acuerdo municipal/BOP).
+     'provisional' → fecha habitual o publicada solo por medios/terceros;
+                     conviene revisarla en el boletín correspondiente.
+
+   Datos recopilados en octubre de 2026. El calendario estatal se publicó
+   en el BOE de 13/10/2026 (Resolución de 8 de octubre de 2026 de la
+   Dirección General de Trabajo, BOE-A-2026-21254).
+   ===================================================================== */
+const DATOS_FESTIVOS = {
+  2027: {
+    nacional: {
+      estado: 'oficial',
+      fuente: 'BOE-A-2026-21254 (Resolución de 8/10/2026, Dirección General de Trabajo; BOE 13/10/2026)',
+      festivos: [
+        ['2027-01-01', 'Año Nuevo'],
+        ['2027-01-06', 'Epifanía del Señor'],
+        ['2027-03-26', 'Viernes Santo'],
+        ['2027-05-01', 'Fiesta del Trabajo'],
+        ['2027-08-15', 'Asunción de la Virgen (cae en domingo)'],
+        ['2027-10-12', 'Fiesta Nacional de España'],
+        ['2027-11-01', 'Todos los Santos'],
+        ['2027-12-06', 'Día de la Constitución Española'],
+        ['2027-12-08', 'Inmaculada Concepción'],
+        ['2027-12-25', 'Natividad del Señor']
+      ]
+    },
+
+    // Festivos propios de cada comunidad (se suman a los nacionales).
+    comunidades: {
+      AN: {
+        nombre: 'Andalucía', estado: 'oficial',
+        fuente: 'Decreto 84/2026, de 29 de abril (BOJA 5/5/2026)',
+        festivos: [
+          ['2027-03-01', 'Día de Andalucía (trasladado del domingo 28 de febrero)'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-08-16', 'Lunes siguiente a la Asunción']
+        ],
+        municipios: {
+          almeria:  { nombre: 'Almería', estado: 'provisional', fuente: 'Fechas habituales; pendiente de acuerdo municipal',
+                      festivos: [['2027-06-24', 'San Juan'], ['2027-08-28', 'Feria de Almería']] },
+          cadiz:    { nombre: 'Cádiz', estado: 'provisional', fuente: 'Fechas habituales; pendiente de acuerdo municipal',
+                      festivos: [['2027-02-08', 'Lunes de Carnaval'], ['2027-10-07', 'Nuestra Señora del Rosario']] },
+          cordoba:  { nombre: 'Córdoba', estado: 'provisional', fuente: 'Fechas habituales; pendiente de acuerdo municipal',
+                      festivos: [['2027-09-08', 'Nuestra Señora de la Fuensanta'], ['2027-10-25', 'San Rafael (posible traslado del domingo 24)']] },
+          granada:  { nombre: 'Granada', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento de Granada (junio 2026)',
+                      festivos: [['2027-05-03', 'Día de la Cruz'], ['2027-05-27', 'Jueves de Corpus']] },
+          huelva:   { nombre: 'Huelva', estado: 'provisional', fuente: 'Fechas habituales; pendiente de acuerdo municipal',
+                      festivos: [['2027-08-03', 'Fiestas Colombinas'], ['2027-09-08', 'Nuestra Señora de la Cinta']] },
+          jaen:     { nombre: 'Jaén', estado: 'provisional', fuente: 'Fechas habituales; pendiente de acuerdo municipal',
+                      festivos: [['2027-06-11', 'Virgen de la Capilla'], ['2027-10-18', 'San Lucas']] },
+          malaga:   { nombre: 'Málaga', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento de Málaga',
+                      festivos: [['2027-08-19', 'Incorporación de Málaga a la Corona de Castilla'], ['2027-09-08', 'Nuestra Señora de la Victoria']] },
+          sevilla:  { nombre: 'Sevilla', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento de Sevilla (junio 2026)',
+                      festivos: [['2027-04-14', 'Miércoles de Feria'], ['2027-05-27', 'Corpus Christi']] }
+        }
+      },
+      AR: {
+        nombre: 'Aragón', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Gobierno de Aragón)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-04-23', 'San Jorge · Día de Aragón'],
+          ['2027-08-16', 'Lunes siguiente a la Asunción']
+        ],
+        municipios: {
+          huesca:   { nombre: 'Huesca', estado: 'provisional', fuente: 'Fechas habituales; revisar BOPH',
+                      festivos: [['2027-01-22', 'San Vicente'], ['2027-08-10', 'San Lorenzo']] },
+          teruel:   { nombre: 'Teruel', estado: 'provisional', fuente: 'Fecha habitual; segundo festivo pendiente de publicación (añádelo a mano)',
+                      festivos: [['2027-07-12', 'Lunes de la Vaquilla del Ángel']] },
+          zaragoza: { nombre: 'Zaragoza', estado: 'provisional', fuente: 'Fechas habituales; revisar BOPZ',
+                      festivos: [['2027-01-29', 'San Valero'], ['2027-03-05', 'Cincomarzada']] }
+        }
+      },
+      AS: {
+        nombre: 'Asturias', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Principado de Asturias)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-08-16', 'Lunes siguiente a la Asunción'],
+          ['2027-09-08', 'Día de Asturias']
+        ],
+        municipios: {
+          gijon:  { nombre: 'Gijón', estado: 'provisional', fuente: 'Publicado por medios locales; revisar BOPA',
+                    festivos: [['2027-02-09', 'Martes de Carnaval'], ['2027-06-29', 'San Pedro']] },
+          oviedo: { nombre: 'Oviedo', estado: 'provisional', fuente: 'Publicado por medios locales; revisar BOPA',
+                    festivos: [['2027-05-18', 'Martes de Campo'], ['2027-09-21', 'San Mateo']] }
+        }
+      },
+      IB: {
+        nombre: 'Illes Balears', estado: 'oficial',
+        fuente: 'Acuerdo del Consell de Govern de 13/3/2026 (BOIB) y BOE-A-2026-21254',
+        festivos: [
+          ['2027-03-01', 'Día de las Illes Balears'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-03-29', 'Lunes de Pascua']
+        ],
+        municipios: {
+          palma: { nombre: 'Palma', estado: 'provisional', fuente: 'Fecha habitual; segundo festivo pendiente de publicación (añádelo a mano)',
+                   festivos: [['2027-01-20', 'Sant Sebastià']] }
+        }
+      },
+      CN: {
+        nombre: 'Canarias', estado: 'oficial',
+        fuente: 'Decreto 115/2026, de 29 de junio (BOC 3/7/2026); fiestas locales: Orden de 7/8/2026 (BOC 21/8/2026)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-08-16', 'Lunes siguiente a la Asunción']
+        ],
+        municipios: {
+          laspalmas: { nombre: 'Las Palmas de Gran Canaria', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento; festivo insular según Decreto 115/2026',
+                       festivos: [['2027-02-09', 'Martes de Carnaval'], ['2027-06-24', 'Fundación de la ciudad'],
+                                  ['2027-09-08', 'Nuestra Señora del Pino', 'provisional', 'Insular']] },
+          santacruz: { nombre: 'Santa Cruz de Tenerife', estado: 'provisional', fuente: 'Publicado por medios; revisar BOC 21/8/2026',
+                       festivos: [['2027-02-02', 'Virgen de la Candelaria', 'provisional', 'Insular'],
+                                  ['2027-02-23', 'Martes de Carnaval'], ['2027-05-03', 'Día de la Cruz']] }
+        }
+      },
+      CB: {
+        nombre: 'Cantabria', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Gobierno de Cantabria)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-07-28', 'Día de las Instituciones de Cantabria'],
+          ['2027-09-15', 'La Bien Aparecida']
+        ],
+        municipios: {
+          santander: { nombre: 'Santander', estado: 'provisional', fuente: 'Fecha habitual; segundo festivo pendiente de publicación (añádelo a mano)',
+                       festivos: [['2027-08-30', 'Santos Mártires']] }
+        }
+      },
+      CL: {
+        nombre: 'Castilla y León', estado: 'oficial',
+        fuente: 'Decreto 7/2026, de 26 de marzo (BOCYL 30/3/2026)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-04-23', 'Fiesta de la Comunidad de Castilla y León'],
+          ['2027-08-16', 'Lunes siguiente a la Asunción']
+        ],
+        municipios: {
+          avila:      { nombre: 'Ávila', estado: 'provisional', fuente: 'Publicado por medios; revisar BOP',
+                        festivos: [['2027-05-03', 'San Segundo (trasladado del domingo 2)'], ['2027-10-15', 'Santa Teresa']] },
+          burgos:     { nombre: 'Burgos', estado: 'provisional', fuente: 'Acordado por el Ayuntamiento; pendiente de BOP',
+                        festivos: [['2027-06-04', 'Curpillos'], ['2027-06-29', 'San Pedro y San Pablo']] },
+          leon:       { nombre: 'León', estado: 'provisional', fuente: 'Publicado por medios; revisar BOP',
+                        festivos: [['2027-06-24', 'San Juan'], ['2027-10-05', 'San Froilán']] },
+          palencia:   { nombre: 'Palencia', estado: 'oficial', fuente: 'Boletín Oficial de la Provincia de Palencia',
+                        festivos: [['2027-02-02', 'Las Candelas'], ['2027-09-02', 'San Antolín']] },
+          ponferrada: { nombre: 'Ponferrada', estado: 'provisional', fuente: 'Publicado por medios; revisar BOP',
+                        festivos: [['2027-09-08', 'La Encina'], ['2027-09-09', 'Día siguiente a La Encina']] },
+          salamanca:  { nombre: 'Salamanca', estado: 'provisional', fuente: 'Fechas habituales; revisar BOP',
+                        festivos: [['2027-06-12', 'San Juan de Sahagún'], ['2027-09-08', 'Virgen de la Vega']] },
+          segovia:    { nombre: 'Segovia', estado: 'oficial', fuente: 'Boletín Oficial de la Provincia de Segovia',
+                        festivos: [['2027-06-29', 'San Pedro'], ['2027-10-25', 'San Frutos']] },
+          soria:      { nombre: 'Soria', estado: 'provisional', fuente: 'Fechas habituales; revisar BOP',
+                        festivos: [['2027-07-02', 'Viernes de Toros (San Juan)'], ['2027-10-02', 'San Saturio']] },
+          valladolid: { nombre: 'Valladolid', estado: 'provisional', fuente: 'Fechas habituales; revisar BOP',
+                        festivos: [['2027-05-13', 'San Pedro Regalado'], ['2027-09-08', 'Virgen de San Lorenzo']] },
+          zamora:     { nombre: 'Zamora', estado: 'oficial', fuente: 'Boletín Oficial de la Provincia de Zamora',
+                        festivos: [['2027-05-17', 'La Hiniesta'], ['2027-06-29', 'San Pedro']] }
+        }
+      },
+      CM: {
+        nombre: 'Castilla-La Mancha', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Junta de Comunidades de Castilla-La Mancha)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-05-27', 'Corpus Christi'],
+          ['2027-05-31', 'Día de Castilla-La Mancha']
+        ],
+        municipios: {
+          albacete:    { nombre: 'Albacete', estado: 'provisional', fuente: 'Fechas habituales; revisar BOP',
+                         festivos: [['2027-06-24', 'San Juan'], ['2027-09-08', 'Virgen de los Llanos']] },
+          ciudadreal:  { nombre: 'Ciudad Real', estado: 'oficial', fuente: 'BOP de Ciudad Real (20/10/2026)',
+                         festivos: [['2027-05-17', 'Fiesta local'], ['2027-07-31', 'Fiesta local']] },
+          cuenca:      { nombre: 'Cuenca', estado: 'provisional', fuente: 'Fechas sin confirmar; revisar BOP',
+                         festivos: [['2027-06-01', 'Fiesta local (San Julián / Ferias)'], ['2027-09-21', 'San Mateo']] },
+          guadalajara: { nombre: 'Guadalajara', estado: 'provisional', fuente: 'Fecha habitual; segundo festivo (viernes de ferias) pendiente (añádelo a mano)',
+                         festivos: [['2027-09-08', 'Virgen de la Antigua']] },
+          toledo:      { nombre: 'Toledo', estado: 'oficial', fuente: 'Junta de Gobierno Local del Ayuntamiento de Toledo (julio 2026)',
+                         festivos: [['2027-03-19', 'San José'], ['2027-03-29', 'Lunes de Pascua']] }
+        }
+      },
+      CT: {
+        nombre: 'Cataluña', estado: 'oficial',
+        fuente: 'Calendario laboral de la Generalitat de Catalunya (DOGC) y BOE-A-2026-21254',
+        festivos: [
+          ['2027-03-29', 'Lunes de Pascua'],
+          ['2027-06-24', 'Sant Joan'],
+          ['2027-09-11', 'Diada Nacional de Catalunya']
+        ],
+        municipios: {
+          barcelona: { nombre: 'Barcelona', estado: 'oficial', fuente: 'Calendario de festivos del Ajuntament de Barcelona',
+                       festivos: [['2027-05-17', 'Lunes de Pascua Granada'], ['2027-09-24', 'La Mercè']] },
+          girona:    { nombre: 'Girona', estado: 'provisional', fuente: 'Fechas habituales; revisar DOGC',
+                       festivos: [['2027-07-25', 'Sant Jaume'], ['2027-10-29', 'Sant Narcís']] },
+          lleida:    { nombre: 'Lleida', estado: 'oficial', fuente: 'Calendario laboral de La Paeria (Ajuntament de Lleida)',
+                       festivos: [['2027-05-11', 'Fiesta Mayor de Primavera · Sant Anastasi'], ['2027-09-29', 'Fiesta Mayor de Otoño · Sant Miquel']] },
+          tarragona: { nombre: 'Tarragona', estado: 'provisional', fuente: 'Fechas habituales; revisar DOGC',
+                       festivos: [['2027-08-19', 'Sant Magí'], ['2027-09-23', 'Santa Tecla']] }
+        }
+      },
+      VC: {
+        nombre: 'Comunitat Valenciana', estado: 'oficial',
+        fuente: 'Decreto del Consell sobre el calendario laboral de 2027 (DOGV) y BOE-A-2026-21254',
+        festivos: [
+          ['2027-03-19', 'San José'],
+          ['2027-03-29', 'Lunes de Pascua'],
+          ['2027-10-09', 'Día de la Comunitat Valenciana', 'provisional']
+        ],
+        municipios: {
+          alicante:  { nombre: 'Alicante', estado: 'oficial', fuente: 'Acuerdo del Ayuntamiento de Alicante',
+                       festivos: [['2027-04-08', 'Santa Faz'], ['2027-06-24', 'San Juan']] },
+          castellon: { nombre: 'Castellón de la Plana', estado: 'provisional', fuente: 'Fechas habituales; pendiente de DOGV',
+                       festivos: [['2027-03-01', 'Lunes de la Magdalena'], ['2027-06-29', 'San Pedro']] },
+          elche:     { nombre: 'Elche', estado: 'provisional', fuente: 'Fechas habituales; pendiente de DOGV',
+                       festivos: [['2027-08-16', 'Fiestas de Agosto (traslado de la Asunción)'], ['2027-12-29', 'Vinguda de la Mare de Déu']] },
+          valencia:  { nombre: 'València', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento de València',
+                       festivos: [['2027-01-22', 'Sant Vicent Màrtir'], ['2027-04-05', 'Sant Vicent Ferrer']] }
+        }
+      },
+      EX: {
+        nombre: 'Extremadura', estado: 'oficial',
+        fuente: 'Decreto 119/2026, de 2 de junio (DOE 8/6/2026)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-09-08', 'Día de Extremadura'],
+          ['2027-10-11', 'Descanso por coincidir la Asunción en domingo', 'provisional']
+        ],
+        municipios: {
+          badajoz: { nombre: 'Badajoz', estado: 'provisional', fuente: 'Fechas habituales; pendiente de publicación',
+                     festivos: [['2027-02-09', 'Martes de Carnaval'], ['2027-06-24', 'San Juan']] },
+          caceres: { nombre: 'Cáceres', estado: 'provisional', fuente: 'Acordado por el Ayuntamiento; pendiente de DOE',
+                     festivos: [['2027-04-23', 'San Jorge'], ['2027-05-28', 'Feria de San Fernando']] }
+        }
+      },
+      GA: {
+        nombre: 'Galicia', estado: 'oficial',
+        fuente: 'Decreto 68/2026, de 15 de junio (DOG 2/7/2026)',
+        festivos: [
+          ['2027-03-19', 'San José'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-05-17', 'Día das Letras Galegas']
+        ],
+        municipios: {
+          coruna:     { nombre: 'A Coruña', estado: 'oficial', fuente: 'Junta de Gobierno Local del Concello da Coruña (julio 2026)',
+                        festivos: [['2027-02-09', 'Martes de Carnaval'], ['2027-06-24', 'San Juan']] },
+          lugo:       { nombre: 'Lugo', estado: 'provisional', fuente: 'Pendiente de confirmación definitiva',
+                        festivos: [['2027-02-09', 'Martes de Carnaval'], ['2027-10-05', 'San Froilán']] },
+          ourense:    { nombre: 'Ourense', estado: 'provisional', fuente: 'Publicado por medios; revisar DOG',
+                        festivos: [['2027-02-09', 'Martes de Carnaval'], ['2027-11-11', 'San Martiño']] },
+          pontevedra: { nombre: 'Pontevedra', estado: 'provisional', fuente: 'Publicado por medios; revisar DOG',
+                        festivos: [['2027-02-10', 'Miércoles de Ceniza'], ['2027-03-29', 'San Cibrán']] },
+          santiago:   { nombre: 'Santiago de Compostela', estado: 'oficial', fuente: 'Acuerdo del Pleno del Concello de Santiago (julio 2026)',
+                        festivos: [['2027-05-06', 'Ascensión'], ['2027-08-16', 'San Roque']] },
+          vigo:       { nombre: 'Vigo', estado: 'provisional', fuente: 'Anunciado por el Concello; pendiente de confirmación',
+                        festivos: [['2027-03-29', 'La Reconquista'], ['2027-08-16', 'San Roque']] }
+        }
+      },
+      MD: {
+        nombre: 'Comunidad de Madrid', estado: 'oficial',
+        fuente: 'Decreto 82/2026, de 30 de septiembre (BOCM 1/10/2026)',
+        festivos: [
+          ['2027-03-19', 'San José'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-08-16', 'Lunes siguiente a la Asunción']
+        ],
+        municipios: {
+          madrid:     { nombre: 'Madrid', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento de Madrid (29/9/2026)',
+                        festivos: [['2027-05-15', 'San Isidro'], ['2027-11-09', 'Nuestra Señora de la Almudena']] },
+          alcala:     { nombre: 'Alcalá de Henares', estado: 'provisional', fuente: 'Propuesta publicada por medios locales; sin confirmar',
+                        festivos: [['2027-08-06', 'Santos Niños Justo y Pastor'], ['2027-10-09', 'Bautismo de Cervantes']] },
+          alcobendas: { nombre: 'Alcobendas', estado: 'provisional', fuente: 'Fechas habituales; pendiente de acuerdo municipal (BOCM)',
+                        festivos: [['2027-01-25', 'Virgen de la Paz (posible traslado del domingo 24)'], ['2027-05-15', 'San Isidro']] },
+          sanse:      { nombre: 'San Sebastián de los Reyes', estado: 'oficial', fuente: 'Acuerdo del Pleno municipal (15/10/2026)',
+                        festivos: [['2027-01-20', 'San Sebastián Mártir'], ['2027-08-28', 'Santísimo Cristo de los Remedios']] }
+        }
+      },
+      MC: {
+        nombre: 'Región de Murcia', estado: 'oficial',
+        fuente: 'Relación de fiestas laborales de 2027 (BORM 27/7/2026)',
+        festivos: [
+          ['2027-03-19', 'San José'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-06-09', 'Día de la Región de Murcia']
+        ],
+        municipios: {
+          murcia:    { nombre: 'Murcia', estado: 'oficial', fuente: 'Acuerdo del Pleno del Ayuntamiento de Murcia (mayo 2026)',
+                       festivos: [['2027-03-30', 'Bando de la Huerta'], ['2027-09-14', 'Romería de la Fuensanta']] },
+          cartagena: { nombre: 'Cartagena', estado: 'oficial', fuente: 'Relación oficial de fiestas locales de la Región de Murcia',
+                       festivos: [['2027-01-07', 'Fiesta local'], ['2027-09-24', 'Fiesta local (Carthagineses y Romanos)']] }
+        }
+      },
+      NC: {
+        nombre: 'Navarra', estado: 'oficial',
+        fuente: 'Resolución 232/2026, de 13 de mayo (BON 28/5/2026). En Navarra hay un único festivo local.',
+        festivos: [
+          ['2027-03-19', 'San José'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-03-29', 'Lunes de Pascua'],
+          ['2027-12-03', 'San Francisco Javier · Día de Navarra']
+        ],
+        municipios: {
+          pamplona: { nombre: 'Pamplona / Iruña', estado: 'provisional', fuente: 'Fecha habitual; revisar BON',
+                      festivos: [['2027-07-07', 'San Fermín']] }
+        }
+      },
+      PV: {
+        nombre: 'País Vasco', estado: 'oficial',
+        fuente: 'Decreto 90/2026, de 9 de junio (BOPV 16/7/2026)',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-03-29', 'Lunes de Pascua'],
+          ['2027-10-07', 'Aniversario del primer Gobierno Vasco']
+        ],
+        municipios: {
+          bilbao:   { nombre: 'Bilbao', estado: 'provisional', fuente: 'Publicado por medios; revisar BOB',
+                      festivos: [['2027-07-31', 'San Ignacio de Loyola'], ['2027-08-27', 'Viernes de Aste Nagusia']] },
+          donostia: { nombre: 'Donostia / San Sebastián', estado: 'provisional', fuente: 'Publicado por medios; revisar BOG',
+                      festivos: [['2027-01-20', 'San Sebastián'], ['2027-07-31', 'San Ignacio de Loyola']] },
+          vitoria:  { nombre: 'Vitoria-Gasteiz', estado: 'provisional', fuente: 'Fechas habituales; revisar BOTHA',
+                      festivos: [['2027-04-28', 'San Prudencio'], ['2027-08-05', 'Virgen Blanca']] }
+        }
+      },
+      RI: {
+        nombre: 'La Rioja', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Gobierno de La Rioja); fiestas locales en el BOR',
+        festivos: [
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-03-29', 'Lunes de Pascua'],
+          ['2027-06-09', 'Día de La Rioja']
+        ],
+        municipios: {
+          logrono: { nombre: 'Logroño', estado: 'oficial', fuente: 'Boletín Oficial de La Rioja (agosto 2026)',
+                     festivos: [['2027-06-11', 'San Bernabé'], ['2027-09-21', 'San Mateo']] }
+        }
+      },
+      CE: {
+        nombre: 'Ceuta', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Ciudad Autónoma de Ceuta)',
+        festivos: [
+          ['2027-03-10', 'Eid al-Fitr (fin del Ramadán)'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-05-17', 'Eid al-Adha (Fiesta del Sacrificio)'],
+          ['2027-08-05', 'Nuestra Señora de África'],
+          ['2027-09-02', 'Día de Ceuta']
+        ],
+        municipios: {
+          ceuta: { nombre: 'Ceuta', estado: 'oficial', fuente: 'Las fiestas propias de la ciudad ya figuran en la relación del BOE', festivos: [] }
+        }
+      },
+      ML: {
+        nombre: 'Melilla', estado: 'oficial',
+        fuente: 'Relación de fiestas del BOE-A-2026-21254 (Ciudad Autónoma de Melilla)',
+        festivos: [
+          ['2027-03-10', 'Eid al-Fitr (fin del Ramadán)'],
+          ['2027-03-25', 'Jueves Santo'],
+          ['2027-05-17', 'Eid al-Adha (Fiesta del Sacrificio)'],
+          ['2027-09-08', 'Nuestra Señora de la Victoria'],
+          ['2027-09-17', 'Día de Melilla']
+        ],
+        municipios: {
+          melilla: { nombre: 'Melilla', estado: 'oficial', fuente: 'Las fiestas propias de la ciudad ya figuran en la relación del BOE', festivos: [] }
+        }
+      }
+    }
+  }
+};
+
+/* =====================================================================
+   2. CONFIGURACIÓN GENERAL
+   ===================================================================== */
+const ANIO_ACTIVO = 2027;                 // Año que se planifica
+const CLAVE_STORAGE = 'holidayBridge.v1'; // Clave en localStorage
+const DIAS_POR_DEFECTO = 24;              // Días de vacaciones por defecto
+const MUNICIPIO_OTRO = '__otro';          // Opción "mi municipio no está"
+const MAX_SUGERENCIAS = 8;                // Sugerencias que se muestran
+const MAX_COSTE_SUGERENCIA = 10;          // Días máximos que gasta una sugerencia
+const MIN_RENTA_AMPLIACION = 2;           // Días libres extra exigidos por cada día extra al ampliar
+const MAX_TRAMO = 25;                     // Longitud máxima (días naturales) del tramo que se rellena
+const MIN_LIBRES_SUGERENCIA = 4;          // Duración mínima de un periodo sugerido
+
+const NOMBRES_MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DIAS_CORTOS = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
+const INICIALES_DIA = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+/* =====================================================================
+   3. UTILIDADES DE FECHA
+   Se trabaja siempre con cadenas 'AAAA-MM-DD' y fechas UTC para evitar
+   sorpresas con zonas horarias y cambios de hora.
+   ===================================================================== */
+function crearISO(anio, mes, dia) {
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+}
+function aFecha(iso) {
+  const [a, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(a, m - 1, d));
+}
+function aISO(fecha) {
+  return fecha.toISOString().slice(0, 10);
+}
+function sumarDias(iso, n) {
+  const f = aFecha(iso);
+  f.setUTCDate(f.getUTCDate() + n);
+  return aISO(f);
+}
+/** Día de la semana empezando en lunes: 0 = lunes … 6 = domingo. */
+function diaSemana(iso) {
+  return (aFecha(iso).getUTCDay() + 6) % 7;
+}
+function esFinDeSemana(iso) {
+  return diaSemana(iso) >= 5;
+}
+function diasDelAnio(anio) {
+  const lista = [];
+  let iso = crearISO(anio, 1, 1);
+  while (iso.startsWith(String(anio))) {
+    lista.push(iso);
+    iso = sumarDias(iso, 1);
+  }
+  return lista;
+}
+/** "lun 16 ago" */
+function formatoCorto(iso) {
+  const f = aFecha(iso);
+  return `${DIAS_CORTOS[diaSemana(iso)]} ${f.getUTCDate()} ${NOMBRES_MES[f.getUTCMonth()].slice(0, 3)}`;
+}
+/** "16 de agosto" */
+function formatoLargo(iso) {
+  const f = aFecha(iso);
+  return `${f.getUTCDate()} de ${NOMBRES_MES[f.getUTCMonth()]}`;
+}
+function rangoTexto(desde, hasta) {
+  return desde === hasta ? formatoCorto(desde) : `${formatoCorto(desde)} → ${formatoCorto(hasta)}`;
+}
+function plural(n, uno, varios) {
+  return `${n} ${n === 1 ? uno : varios}`;
+}
+function escaparHTML(texto) {
+  return String(texto).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* =====================================================================
+   4. ESTADO Y ALMACENAMIENTO (localStorage)
+   ---------------------------------------------------------------------
+   estado = {
+     version, anio, comunidad, municipio, diasTotales,
+     vacaciones: ['AAAA-MM-DD', …],                 // días marcados
+     ajustes: { 'CCAA|municipio': { anadidos: [{fecha, nombre}], quitados: ['AAAA-MM-DD'] } }
+   }
+   ===================================================================== */
+function estadoInicial() {
+  return {
+    version: 1,
+    anio: ANIO_ACTIVO,
+    comunidad: '',
+    municipio: '',
+    diasTotales: DIAS_POR_DEFECTO,
+    vacaciones: [],
+    ajustes: {}
+  };
+}
+
+function cargarEstado() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_STORAGE);
+    if (!crudo) return estadoInicial();
+    const datos = JSON.parse(crudo);
+    const base = estadoInicial();
+    // Se fusiona con el estado inicial para tolerar versiones antiguas o datos incompletos.
+    const estado = Object.assign(base, datos);
+    if (!Array.isArray(estado.vacaciones)) estado.vacaciones = [];
+    estado.vacaciones = estado.vacaciones.filter(f => typeof f === 'string' && f.startsWith(String(ANIO_ACTIVO)));
+    if (typeof estado.ajustes !== 'object' || estado.ajustes === null) estado.ajustes = {};
+    if (!Number.isFinite(estado.diasTotales) || estado.diasTotales < 0) estado.diasTotales = DIAS_POR_DEFECTO;
+    estado.anio = ANIO_ACTIVO;
+    return estado;
+  } catch (e) {
+    return estadoInicial();
+  }
+}
+
+function guardarEstado() {
+  try {
+    localStorage.setItem(CLAVE_STORAGE, JSON.stringify(estado));
+  } catch (e) {
+    mostrarToast('No se ha podido guardar en este navegador (¿modo privado?). Tus cambios se perderán al cerrar.');
+  }
+}
+
+let estado = cargarEstado();
+
+/* =====================================================================
+   5. FESTIVOS EFECTIVOS DE LA UBICACIÓN
+   ===================================================================== */
+function datosAnio() {
+  return DATOS_FESTIVOS[estado.anio];
+}
+function claveUbicacion() {
+  return `${estado.comunidad || '-'}|${estado.municipio || '-'}`;
+}
+function ajustesUbicacion() {
+  const clave = claveUbicacion();
+  if (!estado.ajustes[clave]) estado.ajustes[clave] = { anadidos: [], quitados: [] };
+  return estado.ajustes[clave];
+}
+
+/** Convierte una entrada de datos [fecha, nombre, estado?, ámbito?] en un objeto. */
+function crearEntrada(f, ambito, estadoGrupo, fuente) {
+  return { fecha: f[0], nombre: f[1], estado: f[2] || estadoGrupo, ambito: f[3] || ambito, fuente };
+}
+
+/** Festivos que proceden de los datos (sin los ajustes del usuario). */
+function festivosBase() {
+  const datos = datosAnio();
+  const lista = datos.nacional.festivos.map(f => crearEntrada(f, 'Nacional', datos.nacional.estado, datos.nacional.fuente));
+  const cc = datos.comunidades[estado.comunidad];
+  if (cc) {
+    cc.festivos.forEach(f => lista.push(crearEntrada(f, 'Autonómico', cc.estado, cc.fuente)));
+    const mu = cc.municipios[estado.municipio];
+    if (mu) mu.festivos.forEach(f => lista.push(crearEntrada(f, 'Local', mu.estado, mu.fuente)));
+  }
+  return lista;
+}
+
+/**
+ * Festivos que se aplican de verdad: los de los datos, menos los quitados
+ * por el usuario, más los añadidos a mano. Devuelve un Map fecha → [entradas].
+ */
+function festivosEfectivos() {
+  const ajustes = ajustesUbicacion();
+  const quitados = new Set(ajustes.quitados);
+  const mapa = new Map();
+  const anadir = entrada => {
+    if (!mapa.has(entrada.fecha)) mapa.set(entrada.fecha, []);
+    mapa.get(entrada.fecha).push(entrada);
+  };
+  festivosBase().filter(f => !quitados.has(f.fecha)).forEach(anadir);
+  ajustes.anadidos.forEach(a => anadir({ fecha: a.fecha, nombre: a.nombre, estado: 'personal', ambito: 'Personal', fuente: 'Añadido por ti' }));
+  return mapa;
+}
+
+/* =====================================================================
+   6. MODELO DE DÍAS DEL AÑO
+   Cada día: { fecha, finde, festivos[], laborable, vacacion }
+   Solo los laborables (lunes a viernes no festivos) consumen vacaciones.
+   ===================================================================== */
+function calcularDias() {
+  const festivos = festivosEfectivos();
+  const vacaciones = new Set(estado.vacaciones);
+  return diasDelAnio(estado.anio).map(fecha => {
+    const finde = esFinDeSemana(fecha);
+    const fest = festivos.get(fecha) || [];
+    const laborable = !finde && fest.length === 0;
+    return { fecha, finde, festivos: fest, laborable, vacacion: laborable && vacaciones.has(fecha) };
+  });
+}
+
+/** Un día es libre si es fin de semana, festivo o ya está marcado como vacaciones. */
+function esLibre(dias, i) {
+  return i >= 0 && i < dias.length && (!dias[i].laborable || dias[i].vacacion);
+}
+
+/** Amplía [a, b] hacia fuera mientras los días sean libres. */
+function ampliarTramoLibre(dias, a, b) {
+  while (esLibre(dias, a - 1)) a--;
+  while (esLibre(dias, b + 1)) b++;
+  return [a, b];
+}
+
+/** Recuento de días asignados (solo vacaciones en días laborables). */
+function contarAsignados(dias) {
+  return dias.filter(d => d.vacacion).length;
+}
+
+/**
+ * Agrupa las vacaciones en periodos continuos. Dos días de vacaciones
+ * pertenecen al mismo periodo si entre ellos solo hay días libres.
+ */
+function calcularPeriodos(dias) {
+  const periodos = [];
+  let actual = null;
+  dias.forEach((d, i) => {
+    if (d.laborable && !d.vacacion) { actual = null; return; }
+    if (!d.vacacion) return;
+    if (!actual) {
+      actual = { inicio: i, fin: i, fechas: [] };
+      periodos.push(actual);
+    }
+    actual.fin = i;
+    actual.fechas.push(d.fecha);
+  });
+  return periodos.map(p => {
+    const [a, b] = ampliarTramoLibre(dias, p.inicio, p.fin);
+    return {
+      fechas: p.fechas,
+      desde: dias[p.inicio].fecha,
+      hasta: dias[p.fin].fecha,
+      libreDesde: dias[a].fecha,
+      libreHasta: dias[b].fecha,
+      ia: a, ib: b,
+      coste: p.fechas.length,
+      libres: b - a + 1
+    };
+  });
+}
+
+/* =====================================================================
+   7. MOTOR DE SUGERENCIAS
+   ---------------------------------------------------------------------
+   1) Se generan candidatos: tramos de días laborables [s, e] pegados a
+      algún día libre. Rellenarlos con vacaciones une fines de semana,
+      festivos y vacaciones ya marcadas en un periodo libre continuo.
+   2) Cada candidato se puntúa: eficiencia (días libres / días gastados)
+      × raíz de la duración. Así se premian los periodos largos y
+      rentables, no solo los viernes sueltos.
+   3) Se eligen con un algoritmo voraz que respeta los días pendientes,
+      evita solapes y penaliza los candidatos cercanos a otros periodos
+      para repartir el descanso a lo largo del año. Si ampliar la opción
+      elegida sale muy rentable (≥ 2 días libres por día extra), se amplía.
+   4) La semana del 15 de agosto se recomienda siempre en primer lugar.
+   ===================================================================== */
+function puntuar(libres, coste) {
+  return (libres / coste) * Math.sqrt(libres);
+}
+
+/** Construye un candidato a partir de un tramo [s, e] de índices. */
+function crearCandidato(dias, s, e) {
+  let coste = 0;
+  for (let i = s; i <= e; i++) if (!esLibre(dias, i)) coste++;
+  const [a, b] = ampliarTramoLibre(dias, s, e);
+  const libres = b - a + 1;
+  return {
+    s, e, a, b, coste, libres,
+    desde: dias[s].fecha, hasta: dias[e].fecha,
+    libreDesde: dias[a].fecha, libreHasta: dias[b].fecha,
+    eficiencia: coste > 0 ? libres / coste : Infinity,
+    puntuacion: coste > 0 ? puntuar(libres, coste) : 0
+  };
+}
+
+function generarCandidatos(dias, maxCoste) {
+  const n = dias.length;
+  const porTramo = new Map();
+  for (let s = 0; s < n; s++) {
+    if (esLibre(dias, s)) continue;          // se empieza siempre en un día laborable
+    let coste = 0;
+    for (let e = s; e < n && e - s < MAX_TRAMO; e++) {
+      if (!esLibre(dias, e)) coste++;
+      if (coste > maxCoste) break;
+      if (esLibre(dias, e)) continue;        // y se termina en un día laborable
+      if (!esLibre(dias, s - 1) && !esLibre(dias, e + 1)) continue; // debe tocar algo libre
+      const [a, b] = ampliarTramoLibre(dias, s, e);
+      const libres = b - a + 1;
+      if (libres < MIN_LIBRES_SUGERENCIA) continue;
+      const clave = `${a}-${b}`;
+      const previo = porTramo.get(clave);
+      // Para un mismo periodo libre nos quedamos con la opción más barata.
+      if (!previo || coste < previo.coste) {
+        porTramo.set(clave, {
+          s, e, a, b, coste, libres,
+          desde: dias[s].fecha, hasta: dias[e].fecha,
+          libreDesde: dias[a].fecha, libreHasta: dias[b].fecha,
+          eficiencia: libres / coste,
+          puntuacion: puntuar(libres, coste)
+        });
+      }
+    }
+  }
+  return [...porTramo.values()];
+}
+
+/** Semana laborable (lunes a viernes) del 15 de agosto. */
+function sugerenciaAgosto(dias) {
+  const quince = crearISO(estado.anio, 8, 15);
+  const ds = diaSemana(quince);
+  // Si el 15 cae en sábado se toma la semana anterior; si cae en domingo, la siguiente
+  // (que es la del lunes 16, festivo trasladado en varias comunidades).
+  let lunes;
+  if (ds === 5) lunes = sumarDias(quince, -5);
+  else if (ds === 6) lunes = sumarDias(quince, 1);
+  else lunes = sumarDias(quince, -ds);
+  const s = dias.findIndex(d => d.fecha === lunes);
+  const c = crearCandidato(dias, s, s + 4);
+  c.destacada = true;
+  return c;
+}
+
+/**
+ * Si un candidato amplía periodos que ya tienes, sus días libres previos no
+ * son una ganancia nueva: la rentabilidad se calcula solo con los días
+ * libres que añade (ganados / días gastados).
+ */
+function contarGanados(c, periodos) {
+  const previos = periodos
+    .filter(p => p.ia >= c.a && p.ib <= c.b)
+    .reduce((t, p) => t + (p.ib - p.ia + 1), 0);
+  c.ganados = c.libres - previos;
+  c.eficiencia = c.coste > 0 ? c.ganados / c.coste : Infinity;
+  c.puntuacion = c.coste > 0 ? (c.ganados / c.coste) * Math.sqrt(c.libres) : 0;
+  return c;
+}
+
+function solapan(x, y) {
+  // Se considera solape también si quedan pegados (se fusionarían en un solo periodo).
+  return x.a <= y.b + 1 && y.a <= x.b + 1;
+}
+function distancia(x, y) {
+  if (solapan(x, y)) return 0;
+  return x.a > y.b ? x.a - y.b : y.a - x.b;
+}
+
+/**
+ * Si existe un periodo más largo que contiene al elegido y cada día extra
+ * de vacaciones rinde al menos MIN_RENTA_AMPLIACION días libres más, se
+ * prefiere el largo. Ejemplo: 1 día → 5 libres pasa a 3 días → 10 libres.
+ */
+function ampliarSiCompensa(elegido, candidatos, elegidas, presupuesto) {
+  let actual = elegido;
+  let mejorado = true;
+  while (mejorado) {
+    mejorado = false;
+    let opcion = null;
+    for (const c of candidatos) {
+      if (c.a > actual.a || c.b < actual.b || c.coste <= actual.coste || c.coste > presupuesto) continue;
+      if (elegidas.some(x => solapan(c, x))) continue;
+      const renta = (c.libres - actual.libres) / (c.coste - actual.coste);
+      if (renta >= MIN_RENTA_AMPLIACION && (!opcion || c.eficiencia > opcion.eficiencia)) opcion = c;
+    }
+    if (opcion) { actual = opcion; mejorado = true; }
+  }
+  return actual;
+}
+
+function calcularSugerencias(dias, pendientes, periodos) {
+  const resultado = [];
+  let presupuesto = Math.max(0, pendientes);
+
+  // 1) Semana del 15 de agosto: siempre primero.
+  const agosto = contarGanados(sugerenciaAgosto(dias), periodos);
+  resultado.push(agosto);
+  const elegidas = [];
+  if (agosto.coste > 0 && agosto.coste <= presupuesto) {
+    presupuesto -= agosto.coste;
+    elegidas.push(agosto);
+  }
+  if (presupuesto <= 0) return resultado;
+
+  // 2) Resto de candidatos.
+  const candidatos = generarCandidatos(dias, Math.min(presupuesto, MAX_COSTE_SUGERENCIA))
+    .filter(c => !solapan(c, agosto) || agosto.coste === 0)
+    .map(c => contarGanados(c, periodos));
+  const anclas = periodos.map(p => ({ a: p.ia, b: p.ib }));
+
+  while (resultado.length < MAX_SUGERENCIAS) {
+    let mejor = null;
+    let mejorPuntos = -1;
+    for (const c of candidatos) {
+      if (c.coste > presupuesto) continue;
+      if (elegidas.some(x => solapan(c, x))) continue;
+      let puntos = c.puntuacion;
+      // Reparto a lo largo del año: penaliza lo que queda cerca de otros periodos.
+      for (const ref of anclas.concat(elegidas)) {
+        const d = distancia(c, ref);
+        if (d === 0) puntos *= 0.6;
+        else if (d < 21) puntos *= 0.45;
+        else if (d < 45) puntos *= 0.75;
+      }
+      if (puntos > mejorPuntos) { mejorPuntos = puntos; mejor = c; }
+    }
+    if (!mejor) break;
+    mejor = ampliarSiCompensa(mejor, candidatos, elegidas, presupuesto);
+    elegidas.push(mejor);
+    resultado.push(mejor);
+    presupuesto -= mejor.coste;
+  }
+  return resultado;
+}
+
+/* =====================================================================
+   8. EXPORTACIÓN iCalendar (.ics)
+   ---------------------------------------------------------------------
+   RFC 5545: líneas terminadas en CRLF, plegado a 75 octetos y eventos
+   de día completo con DTEND exclusivo (día siguiente al último día).
+   ===================================================================== */
+function escaparICS(texto) {
+  return String(texto).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+/** Pliega una línea en trozos de máximo 75 octetos (UTF-8), sin partir caracteres. */
+function plegarLinea(linea) {
+  const codificador = new TextEncoder();
+  const partes = [];
+  let actual = '';
+  let bytes = 0;
+  for (const caracter of linea) {
+    const tam = codificador.encode(caracter).length;
+    const limite = partes.length === 0 ? 75 : 74; // las continuaciones empiezan con un espacio
+    if (bytes + tam > limite) {
+      partes.push(actual);
+      actual = '';
+      bytes = 0;
+    }
+    actual += caracter;
+    bytes += tam;
+  }
+  partes.push(actual);
+  return partes.join('\r\n ');
+}
+function fechaICS(iso) {
+  return iso.replace(/-/g, '');
+}
+function marcaTiempoUTC(fecha) {
+  return fecha.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+function generarICS(periodos, ahora = new Date()) {
+  const dtstamp = marcaTiempoUTC(ahora);
+  const lineas = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Holiday Bridge//Vacaciones ' + estado.anio + '//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Vacaciones ' + estado.anio
+  ];
+  periodos.forEach(p => {
+    const descripcion = `${plural(p.coste, 'día', 'días')} de vacaciones. ` +
+      `Libre del ${formatoLargo(p.libreDesde)} al ${formatoLargo(p.libreHasta)}: ${plural(p.libres, 'día seguido', 'días seguidos')}. ` +
+      'Planificado con Holiday Bridge.';
+    lineas.push(
+      'BEGIN:VEVENT',
+      `UID:hb-${fechaICS(p.desde)}-${fechaICS(p.hasta)}@holiday-bridge`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART;VALUE=DATE:${fechaICS(p.desde)}`,
+      `DTEND;VALUE=DATE:${fechaICS(sumarDias(p.hasta, 1))}`, // fin exclusivo
+      'SUMMARY:' + escaparICS('Vacaciones'),
+      'DESCRIPTION:' + escaparICS(descripcion),
+      'TRANSP:OPAQUE',
+      'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
+      'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+      'END:VEVENT'
+    );
+  });
+  lineas.push('END:VCALENDAR');
+  return lineas.map(plegarLinea).join('\r\n') + '\r\n';
+}
+
+function descargarICS() {
+  const periodos = calcularPeriodos(calcularDias());
+  if (periodos.length === 0) {
+    mostrarToast('Aún no hay vacaciones que exportar. ¡Marca algún día o acepta una sugerencia!');
+    return;
+  }
+  const blob = new Blob([generarICS(periodos)], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = `vacaciones-${estado.anio}.ics`;
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  mostrarToast(`Exportado: ${plural(periodos.length, 'periodo', 'periodos')}. Ábrelo con Outlook o impórtalo en Google Calendar.`);
+}
+
+/* =====================================================================
+   9. ACCIONES SOBRE LA PLANIFICACIÓN
+   ===================================================================== */
+function anadirVacaciones(fechas) {
+  const conjunto = new Set(estado.vacaciones);
+  fechas.forEach(f => conjunto.add(f));
+  estado.vacaciones = [...conjunto].sort();
+}
+function quitarVacaciones(fechas) {
+  const fuera = new Set(fechas);
+  estado.vacaciones = estado.vacaciones.filter(f => !fuera.has(f));
+}
+
+function aceptarSugerencia(c) {
+  const dias = calcularDias();
+  const pendientes = estado.diasTotales - contarAsignados(dias);
+  if (c.coste > pendientes) {
+    mostrarToast(`Necesitas ${plural(c.coste, 'día', 'días')} y te quedan ${pendientes}. ¿Sumamos los del año pasado?`);
+    return;
+  }
+  const fechas = [];
+  for (let i = c.s; i <= c.e; i++) if (dias[i].laborable && !dias[i].vacacion) fechas.push(dias[i].fecha);
+  anadirVacaciones(fechas);
+  guardarEstado();
+  render();
+  if (c.ganados < c.libres) {
+    mostrarToast(`¡Hecho! Con ${plural(c.coste, 'día', 'días')} más, tu periodo crece hasta ${plural(c.libres, 'día libre', 'días libres')} seguidos 🌉`);
+  } else {
+    mostrarToast(`¡Hecho! ${plural(c.libres, 'día libre', 'días libres')} seguidos por solo ${plural(c.coste, 'día', 'días')}. Puente tendido 🌉`);
+  }
+}
+
+function alternarDia(fecha) {
+  const dias = calcularDias();
+  const dia = dias.find(d => d.fecha === fecha);
+  if (!dia) return;
+  if (!dia.laborable) {
+    mostrarToast(dia.finde ? 'Es fin de semana: ya es libre, no gastes vacaciones aquí 😉' : `Es festivo (${dia.festivos.map(f => f.nombre).join(' · ')}). ¡Gratis!`);
+    return;
+  }
+  if (dia.vacacion) {
+    quitarVacaciones([fecha]);
+  } else {
+    const pendientes = estado.diasTotales - contarAsignados(dias);
+    if (pendientes <= 0) {
+      mostrarToast('No te quedan días pendientes. Quita alguno o aumenta tus días disponibles.');
+      return;
+    }
+    anadirVacaciones([fecha]);
+  }
+  guardarEstado();
+  render();
+}
+
+function restablecerPlanificacion() {
+  const ok = window.confirm('¿Seguro que quieres borrar todas tus vacaciones planificadas?\n\nSe mantendrán tu ubicación, tus días disponibles y tus festivos personalizados.');
+  if (!ok) return;
+  estado.vacaciones = [];
+  guardarEstado();
+  render();
+  mostrarToast('Planificación restablecida. Lienzo en blanco: ¡a tender puentes!');
+}
+
+/* =====================================================================
+   10. INTERFAZ (render)
+   ===================================================================== */
+const $ = selector => document.querySelector(selector);
+let sugerenciasActuales = [];
+let periodosActuales = [];
+
+function mostrarToast(texto) {
+  const t = $('#toast');
+  t.textContent = texto;
+  t.classList.add('visible');
+  clearTimeout(mostrarToast.temporizador);
+  mostrarToast.temporizador = setTimeout(() => t.classList.remove('visible'), 3200);
+}
+
+function renderSelectores() {
+  const datos = datosAnio();
+  const selC = $('#sel-comunidad');
+  const comunidades = Object.entries(datos.comunidades).sort((x, y) => x[1].nombre.localeCompare(y[1].nombre, 'es'));
+  selC.innerHTML = '<option value="">— Elige tu comunidad —</option>' +
+    comunidades.map(([id, c]) => `<option value="${id}">${escaparHTML(c.nombre)}</option>`).join('');
+  selC.value = estado.comunidad;
+
+  const selM = $('#sel-municipio');
+  const cc = datos.comunidades[estado.comunidad];
+  if (!cc) {
+    selM.innerHTML = '<option value="">— Primero elige comunidad —</option>';
+    selM.disabled = true;
+  } else {
+    const municipios = Object.entries(cc.municipios).sort((x, y) => x[1].nombre.localeCompare(y[1].nombre, 'es'));
+    selM.innerHTML = '<option value="">— Elige tu municipio —</option>' +
+      municipios.map(([id, m]) => `<option value="${id}">${escaparHTML(m.nombre)}</option>`).join('') +
+      `<option value="${MUNICIPIO_OTRO}">Otro municipio (añadiré mis festivos locales)</option>`;
+    selM.disabled = false;
+  }
+  selM.value = estado.municipio;
+  $('#inp-dias').value = estado.diasTotales;
+}
+
+function renderAvisoUbicacion() {
+  const aviso = $('#aviso-ubicacion');
+  const cc = datosAnio().comunidades[estado.comunidad];
+  let texto = '';
+  if (!cc) {
+    texto = 'Elige tu comunidad y municipio para ver tus festivos. Mientras tanto, solo se aplican los nacionales.';
+  } else if (!estado.municipio) {
+    texto = 'Elige tu municipio para incluir sus festivos locales.';
+  } else if (estado.municipio === MUNICIPIO_OTRO) {
+    texto = 'Tu municipio no está en la lista: añade tus dos festivos locales abajo, en «Festivos de tu ubicación».';
+  } else {
+    const mu = cc.municipios[estado.municipio];
+    if (mu && mu.estado === 'provisional') texto = `Los festivos locales de ${mu.nombre} son provisionales. Revísalos y corrígelos si hace falta.`;
+    else if (mu && mu.festivos.length < 2 && estado.comunidad !== 'NC' && estado.comunidad !== 'CE' && estado.comunidad !== 'ML') texto = `Falta algún festivo local de ${mu.nombre}: añádelo abajo cuando se publique.`;
+  }
+  aviso.textContent = texto;
+  aviso.classList.toggle('oculto', !texto);
+}
+
+function renderContador(dias, periodos) {
+  const asignados = contarAsignados(dias);
+  const pendientes = estado.diasTotales - asignados;
+  $('#c-disponibles').textContent = estado.diasTotales;
+  $('#c-asignados').textContent = asignados;
+  $('#c-pendientes').textContent = pendientes;
+  $('#caja-pendientes').classList.toggle('negativo', pendientes < 0);
+  const uso = estado.diasTotales > 0 ? Math.min(100, (asignados / estado.diasTotales) * 100) : 0;
+  $('#barra-uso').style.width = uso + '%';
+  const libres = periodos.reduce((t, p) => t + p.libres, 0);
+  let texto = '';
+  if (periodos.length) {
+    texto = `Con ${plural(asignados, 'día', 'días')} consigues ${plural(libres, 'día libre', 'días libres')} en ${plural(periodos.length, 'periodo', 'periodos')}.`;
+  }
+  if (pendientes < 0) texto += ` Te has pasado en ${plural(-pendientes, 'día', 'días')}: quita alguno o aumenta tus días disponibles.`;
+  $('#resumen-libres').textContent = texto;
+}
+
+function htmlCifras(c) {
+  const eficiencia = Number.isFinite(c.eficiencia) ? c.eficiencia.toFixed(1).replace('.', ',') : '∞';
+  return `<div class="cifras">
+      <span class="chip acento">Gastas ${plural(c.coste, 'día', 'días')}</span>
+      <span class="chip acento">${plural(c.libres, 'día libre', 'días libres')} seguidos</span>
+      ${c.ganados !== undefined && c.ganados < c.libres ? `<span class="chip">amplía tu periodo: +${c.ganados} libres</span>` : ''}
+      <span class="chip">×${eficiencia} rentabilidad</span>
+    </div>`;
+}
+
+function renderSugerencias(dias, pendientes, periodos) {
+  sugerenciasActuales = calcularSugerencias(dias, pendientes, periodos);
+  const lista = $('#lista-sugerencias');
+  const normales = sugerenciasActuales.filter(c => !c.destacada);
+  const coste = normales.reduce((t, c) => t + c.coste, 0);
+  $('#chip-sugerencias').textContent = pendientes > 0 ? `${plural(pendientes, 'día pendiente', 'días pendientes')}` : 'sin días pendientes';
+
+  const html = sugerenciasActuales.map((c, i) => {
+    const etiqueta = c.destacada ? '<span class="chip etiqueta">Recomendada · semana del 15 de agosto</span>' : '';
+    let boton;
+    if (c.coste === 0) boton = '<span class="chip">Ya la tienes ✔</span>';
+    else if (c.coste > pendientes) boton = `<button class="btn btn-mini" type="button" disabled title="No te quedan días suficientes">Faltan ${c.coste - Math.max(0, pendientes)}</button>`;
+    else boton = `<button class="btn btn-primario btn-mini" type="button" data-aceptar="${i}">Añadir</button>`;
+    const detalle = c.coste === 0
+      ? 'Esta semana ya está cubierta por tus vacaciones o festivos.'
+      : `Pide ${rangoTexto(c.desde, c.hasta)} · libre ${rangoTexto(c.libreDesde, c.libreHasta)}`;
+    return `<div class="sugerencia ${c.destacada ? 'destacada' : ''}" data-sugerencia="${i}">
+        <div>
+          ${etiqueta}
+          <div class="fechas">${escaparHTML(rangoTexto(c.libreDesde, c.libreHasta))}</div>
+          <div class="detalle">${escaparHTML(detalle)}</div>
+          ${c.coste > 0 ? htmlCifras(c) : ''}
+        </div>
+        <div>${boton}</div>
+      </div>`;
+  }).join('');
+
+  let pie = '';
+  if (pendientes <= 0) pie = '<p class="vacio">¡Ya has repartido todos tus días! Que los disfrutes 🏖️</p>';
+  else if (!normales.length) pie = '<p class="vacio">No encontramos más combinaciones con los días que te quedan. Prueba a marcar días sueltos en el calendario.</p>';
+  else pie = `<p class="subtitulo">Si aceptas todas las sugerencias (sin contar agosto) gastarías ${plural(coste, 'día', 'días')}.</p>`;
+  lista.innerHTML = html + pie;
+}
+
+function renderPeriodos(periodos) {
+  periodosActuales = periodos;
+  const lista = $('#lista-periodos');
+  if (!periodos.length) {
+    lista.innerHTML = '<p class="vacio">Todavía no has planificado nada. Empieza por la semana de agosto: es un clásico por algo.</p>';
+    return;
+  }
+  lista.innerHTML = periodos.map((p, i) => `
+    <div class="periodo">
+      <div>
+        <div class="fechas">${escaparHTML(rangoTexto(p.libreDesde, p.libreHasta))}</div>
+        <div class="detalle">Vacaciones: ${escaparHTML(rangoTexto(p.desde, p.hasta))}</div>
+        ${htmlCifras({ coste: p.coste, libres: p.libres, eficiencia: p.libres / p.coste })}
+      </div>
+      <button class="btn btn-mini btn-peligro" type="button" data-quitar-periodo="${i}" title="Quitar este periodo y recuperar sus días">Quitar</button>
+    </div>`).join('');
+}
+
+function renderCalendario(dias, periodos) {
+  // Índices de días libres que forman parte de un periodo con vacaciones.
+  const enPeriodo = new Set();
+  periodos.forEach(p => { for (let i = p.ia; i <= p.ib; i++) enPeriodo.add(i); });
+
+  let html = '';
+  for (let mes = 0; mes < 12; mes++) {
+    const delMes = [];
+    dias.forEach((d, i) => { if (aFecha(d.fecha).getUTCMonth() === mes) delMes.push([d, i]); });
+    const huecos = diaSemana(delMes[0][0].fecha);
+    const vacMes = delMes.filter(([d]) => d.vacacion).length;
+    const festMes = delMes.filter(([d]) => d.festivos.length && !d.finde).length;
+    let celdas = INICIALES_DIA.map(l => `<div class="cab-dia">${l}</div>`).join('');
+    for (let h = 0; h < huecos; h++) celdas += '<span class="dia vacio"></span>';
+    delMes.forEach(([d, i]) => {
+      const clases = ['dia'];
+      let titulo = formatoLargo(d.fecha);
+      if (d.festivos.length) {
+        clases.push('festivo');
+        if (d.festivos.every(f => f.estado === 'provisional')) clases.push('provisional');
+        titulo += ' · ' + d.festivos.map(f => `${f.nombre} (${f.ambito.toLowerCase()}${f.estado === 'provisional' ? ', provisional' : ''})`).join(' · ');
+      } else if (d.finde) {
+        clases.push('finde');
+        titulo += ' · fin de semana';
+      } else if (d.vacacion) {
+        clases.push('vacaciones');
+        titulo += ' · vacaciones (clic para quitar)';
+      } else {
+        clases.push('laborable');
+        titulo += ' · laborable (clic para marcar vacaciones)';
+      }
+      if (enPeriodo.has(i) && !d.vacacion) clases.push('en-periodo');
+      celdas += `<button type="button" class="${clases.join(' ')}" data-fecha="${d.fecha}" title="${escaparHTML(titulo)}" aria-label="${escaparHTML(titulo)}">${aFecha(d.fecha).getUTCDate()}</button>`;
+    });
+    const resumen = [festMes ? plural(festMes, 'festivo', 'festivos') : '', vacMes ? `${vacMes} vac.` : ''].filter(Boolean).join(' · ');
+    html += `<div class="mes"><h3>${NOMBRES_MES[mes]} <span class="resumen-mes">${resumen}</span></h3><div class="rejilla">${celdas}</div></div>`;
+  }
+  $('#calendario').innerHTML = html;
+}
+
+function renderFestivos() {
+  const ajustes = ajustesUbicacion();
+  const quitados = new Set(ajustes.quitados);
+  const filas = [];
+  festivosBase().forEach(f => filas.push({ ...f, quitado: quitados.has(f.fecha), personal: false }));
+  ajustes.anadidos.forEach((a, idx) => filas.push({ fecha: a.fecha, nombre: a.nombre, ambito: 'Personal', estado: 'personal', personal: true, idx }));
+  filas.sort((x, y) => x.fecha.localeCompare(y.fecha));
+
+  $('#tabla-festivos').innerHTML = filas.map(f => {
+    const etiquetaEstado = f.estado === 'oficial' ? 'Oficial' : f.estado === 'provisional' ? 'Provisional' : 'Tuyo';
+    let accion;
+    if (f.personal) accion = `<button class="btn btn-mini" type="button" data-borrar-anadido="${f.idx}">Quitar</button>`;
+    else if (f.quitado) accion = `<button class="btn btn-mini" type="button" data-restaurar="${f.fecha}">Restaurar</button>`;
+    else accion = `<button class="btn btn-mini" type="button" data-quitar-festivo="${f.fecha}" title="No es festivo en mi caso">Quitar</button>`;
+    const finde = esFinDeSemana(f.fecha) ? ' <span class="chip">cae en fin de semana</span>' : '';
+    return `<tr class="${f.quitado ? 'quitado' : ''}">
+        <td>${escaparHTML(formatoCorto(f.fecha))}</td>
+        <td>${escaparHTML(f.nombre)}${finde}</td>
+        <td>${escaparHTML(f.ambito)}</td>
+        <td><span class="estado ${f.estado}">${etiquetaEstado}</span></td>
+        <td>${accion}</td>
+      </tr>`;
+  }).join('');
+
+  // Fuentes de los datos mostrados.
+  const datos = datosAnio();
+  const fuentes = [`<li><strong>Nacionales:</strong> ${escaparHTML(datos.nacional.fuente)}</li>`];
+  const cc = datos.comunidades[estado.comunidad];
+  if (cc) {
+    fuentes.push(`<li><strong>${escaparHTML(cc.nombre)}:</strong> ${escaparHTML(cc.fuente)}</li>`);
+    const mu = cc.municipios[estado.municipio];
+    if (mu) fuentes.push(`<li><strong>${escaparHTML(mu.nombre)}:</strong> ${escaparHTML(mu.fuente)} <span class="estado ${mu.estado}">${mu.estado === 'oficial' ? 'Oficial' : 'Provisional'}</span></li>`);
+  }
+  $('#lista-fuentes').innerHTML = fuentes.join('');
+  const hayAjustes = ajustes.anadidos.length > 0 || ajustes.quitados.length > 0;
+  $('#btn-restaurar-festivos').classList.toggle('oculto', !hayAjustes);
+}
+
+/** Pinta toda la aplicación a partir del estado. */
+function render() {
+  const dias = calcularDias();
+  const periodos = calcularPeriodos(dias);
+  const pendientes = estado.diasTotales - contarAsignados(dias);
+  renderSelectores();
+  renderAvisoUbicacion();
+  renderContador(dias, periodos);
+  renderSugerencias(dias, pendientes, periodos);
+  renderPeriodos(periodos);
+  renderCalendario(dias, periodos);
+  renderFestivos();
+  $('#btn-exportar').disabled = periodos.length === 0;
+}
+
+/* Vista previa de una sugerencia en el calendario */
+function marcarVistaPrevia(c) {
+  limpiarVistaPrevia();
+  if (!c) return;
+  document.querySelectorAll('#calendario .dia[data-fecha]').forEach(el => {
+    const f = el.dataset.fecha;
+    if (f >= c.libreDesde && f <= c.libreHasta) el.classList.add('preview');
+  });
+}
+function limpiarVistaPrevia() {
+  document.querySelectorAll('#calendario .dia.preview').forEach(el => el.classList.remove('preview'));
+}
+
+/* =====================================================================
+   11. EVENTOS
+   ===================================================================== */
+function iniciarEventos() {
+  $('#sel-comunidad').addEventListener('change', e => {
+    estado.comunidad = e.target.value;
+    const cc = datosAnio().comunidades[estado.comunidad];
+    // Si la comunidad solo tiene un municipio (Ceuta, Melilla…) se selecciona directamente.
+    const ids = cc ? Object.keys(cc.municipios) : [];
+    estado.municipio = ids.length === 1 && (estado.comunidad === 'CE' || estado.comunidad === 'ML') ? ids[0] : '';
+    guardarEstado();
+    render();
+  });
+  $('#sel-municipio').addEventListener('change', e => {
+    estado.municipio = e.target.value;
+    guardarEstado();
+    render();
+    if (estado.municipio) mostrarToast('Festivos actualizados. Las sugerencias se han recalculado para tu municipio.');
+  });
+  $('#inp-dias').addEventListener('change', e => {
+    const valor = Math.round(Number(e.target.value));
+    estado.diasTotales = Number.isFinite(valor) && valor >= 0 ? Math.min(valor, 99) : DIAS_POR_DEFECTO;
+    guardarEstado();
+    render();
+  });
+
+  // Calendario: marcar o desmarcar días sueltos.
+  $('#calendario').addEventListener('click', e => {
+    const boton = e.target.closest('.dia[data-fecha]');
+    if (boton) alternarDia(boton.dataset.fecha);
+  });
+
+  // Sugerencias: aceptar y vista previa.
+  const lista = $('#lista-sugerencias');
+  lista.addEventListener('click', e => {
+    const boton = e.target.closest('[data-aceptar]');
+    if (boton) aceptarSugerencia(sugerenciasActuales[Number(boton.dataset.aceptar)]);
+  });
+  lista.addEventListener('mouseover', e => {
+    const tarjeta = e.target.closest('[data-sugerencia]');
+    if (tarjeta) marcarVistaPrevia(sugerenciasActuales[Number(tarjeta.dataset.sugerencia)]);
+  });
+  lista.addEventListener('mouseleave', limpiarVistaPrevia);
+  lista.addEventListener('focusin', e => {
+    const tarjeta = e.target.closest('[data-sugerencia]');
+    if (tarjeta) marcarVistaPrevia(sugerenciasActuales[Number(tarjeta.dataset.sugerencia)]);
+  });
+  lista.addEventListener('focusout', limpiarVistaPrevia);
+
+  // Periodos: quitar y recuperar días.
+  $('#lista-periodos').addEventListener('click', e => {
+    const boton = e.target.closest('[data-quitar-periodo]');
+    if (!boton) return;
+    const p = periodosActuales[Number(boton.dataset.quitarPeriodo)];
+    quitarVacaciones(p.fechas);
+    guardarEstado();
+    render();
+    mostrarToast(`Periodo quitado: recuperas ${plural(p.coste, 'día', 'días')}.`);
+  });
+
+  // Festivos: quitar, restaurar y borrar los añadidos.
+  $('#tabla-festivos').addEventListener('click', e => {
+    const ajustes = ajustesUbicacion();
+    const quitar = e.target.closest('[data-quitar-festivo]');
+    const restaurar = e.target.closest('[data-restaurar]');
+    const borrar = e.target.closest('[data-borrar-anadido]');
+    if (quitar) {
+      if (!ajustes.quitados.includes(quitar.dataset.quitarFestivo)) ajustes.quitados.push(quitar.dataset.quitarFestivo);
+    } else if (restaurar) {
+      ajustes.quitados = ajustes.quitados.filter(f => f !== restaurar.dataset.restaurar);
+    } else if (borrar) {
+      ajustes.anadidos.splice(Number(borrar.dataset.borrarAnadido), 1);
+    } else {
+      return;
+    }
+    guardarEstado();
+    render();
+  });
+
+  $('#form-festivo').addEventListener('submit', e => {
+    e.preventDefault();
+    const fecha = $('#inp-fecha-festivo').value;
+    const nombre = $('#inp-nombre-festivo').value.trim();
+    if (!fecha || !fecha.startsWith(String(estado.anio))) {
+      mostrarToast(`Elige una fecha de ${estado.anio}.`);
+      return;
+    }
+    if (!nombre) return;
+    const ajustes = ajustesUbicacion();
+    ajustes.anadidos.push({ fecha, nombre });
+    guardarEstado();
+    render();
+    e.target.reset();
+    const extra = estado.vacaciones.includes(fecha) && !esFinDeSemana(fecha) ? ' Ese día tenías vacaciones: lo recuperas.' : '';
+    mostrarToast(`Festivo añadido: ${nombre}.${extra}`);
+  });
+
+  $('#btn-restaurar-festivos').addEventListener('click', () => {
+    if (!window.confirm('¿Deshacer todos tus cambios en los festivos de esta ubicación?')) return;
+    delete estado.ajustes[claveUbicacion()];
+    guardarEstado();
+    render();
+  });
+
+  $('#btn-exportar').addEventListener('click', descargarICS);
+  $('#btn-reset').addEventListener('click', restablecerPlanificacion);
+}
+
+/* =====================================================================
+   12. ARRANQUE
+   ===================================================================== */
+document.getElementById('anio-titulo').textContent = ANIO_ACTIVO;
+document.getElementById('anio-calendario').textContent = ANIO_ACTIVO;
+document.getElementById('inp-fecha-festivo').min = `${ANIO_ACTIVO}-01-01`;
+document.getElementById('inp-fecha-festivo').max = `${ANIO_ACTIVO}-12-31`;
+iniciarEventos();
+render();
+
+// Acceso para pruebas desde la consola del navegador.
+window.HolidayBridge = {
+  DATOS_FESTIVOS, calcularDias, calcularPeriodos, calcularSugerencias, generarICS,
+  obtenerEstado: () => estado
+};
+</script>
+</body>
+</html>
